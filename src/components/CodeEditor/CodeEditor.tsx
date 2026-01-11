@@ -144,12 +144,14 @@ interface CodeEditorProps {
   initialCode?: string;
   fileName?: string;
   initialLanguage?: string;
+  stickyHeader?: boolean;
 }
 
 export const CodeEditor = ({ 
   initialCode = SAMPLE_CODE, 
   fileName = "useAuth.tsx",
-  initialLanguage = "typescript"
+  initialLanguage = "typescript",
+  stickyHeader = false
 }: CodeEditorProps) => {
   const [code, setCode] = useState(initialCode);
   const [language, setLanguage] = useState(initialLanguage);
@@ -300,28 +302,30 @@ export const CodeEditor = ({
         "overflow-hidden shadow-lg border-border",
         isFullscreen && "h-full flex flex-col"
       )}>
-        <EditorHeader
-          fileName={currentFileName}
-          language={language}
-          isFullscreen={isFullscreen}
-          isWrapped={isWrapped}
-          isEditing={isEditing}
-          isDarkTheme={isDarkTheme}
-          hasChanges={hasChanges}
-          onCopy={handleCopy}
-          onDownload={handleDownload}
-          onUpload={handleUpload}
-          onToggleFullscreen={handleToggleFullscreen}
-          onToggleWrap={() => setIsWrapped(!isWrapped)}
-          onToggleSearch={openSearch}
-          onUndo={undo}
-          onRedo={redo}
-          onToggleEdit={() => setIsEditing(!isEditing)}
-          onToggleTheme={() => setIsDarkTheme(!isDarkTheme)}
-          onLanguageChange={setLanguage}
-          onFontSizeChange={setFontSize}
-          fontSize={fontSize}
-        />
+        <div className={stickyHeader ? "sticky top-14 z-40" : ""}>
+          <EditorHeader
+            fileName={currentFileName}
+            language={language}
+            isFullscreen={isFullscreen}
+            isWrapped={isWrapped}
+            isEditing={isEditing}
+            isDarkTheme={isDarkTheme}
+            hasChanges={hasChanges}
+            onCopy={handleCopy}
+            onDownload={handleDownload}
+            onUpload={handleUpload}
+            onToggleFullscreen={handleToggleFullscreen}
+            onToggleWrap={() => setIsWrapped(!isWrapped)}
+            onToggleSearch={openSearch}
+            onUndo={undo}
+            onRedo={redo}
+            onToggleEdit={() => setIsEditing(!isEditing)}
+            onToggleTheme={() => setIsDarkTheme(!isDarkTheme)}
+            onLanguageChange={setLanguage}
+            onFontSizeChange={setFontSize}
+            fontSize={fontSize}
+          />
+        </div>
         
         <div 
           ref={editorRef} 
