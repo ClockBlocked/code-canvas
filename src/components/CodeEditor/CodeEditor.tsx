@@ -144,14 +144,12 @@ interface CodeEditorProps {
   initialCode?: string;
   fileName?: string;
   initialLanguage?: string;
-  stickyHeader?: boolean;
 }
 
 export const CodeEditor = ({ 
   initialCode = SAMPLE_CODE, 
   fileName = "useAuth.tsx",
-  initialLanguage = "typescript",
-  stickyHeader = false
+  initialLanguage = "typescript"
 }: CodeEditorProps) => {
   const [code, setCode] = useState(initialCode);
   const [language, setLanguage] = useState(initialLanguage);
@@ -299,10 +297,11 @@ export const CodeEditor = ({
       )}
     >
       <Card className={cn(
-        "overflow-hidden shadow-lg border-border",
+        "overflow-visible shadow-lg border-border",
         isFullscreen && "h-full flex flex-col"
       )}>
-        <div className={stickyHeader ? "sticky top-14 z-40" : ""}>
+        {/* Sticky header - sticks to top-14 (navbar height) when scrolling */}
+        <div className="sticky top-14 z-40 bg-muted/50 border-b border-border rounded-t-lg">
           <EditorHeader
             fileName={currentFileName}
             language={language}

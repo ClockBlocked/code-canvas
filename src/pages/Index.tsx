@@ -1,44 +1,20 @@
-import { useRef, useEffect, useState } from "react";
 import { CodeEditor } from "@/components/CodeEditor";
 import { TopNavbar } from "@/components/TopNavbar";
 import { BreadcrumbsBar } from "@/components/BreadcrumbsBar";
 import { Sparkles } from "lucide-react";
 
 const Index = () => {
-  const breadcrumbsRef = useRef<HTMLDivElement>(null);
-  const editorContainerRef = useRef<HTMLDivElement>(null);
-  const [isEditorSticky, setIsEditorSticky] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (breadcrumbsRef.current && editorContainerRef.current) {
-        const breadcrumbsRect = breadcrumbsRef.current.getBoundingClientRect();
-        // When breadcrumbs top reaches the navbar bottom (top: 56px = navbar height)
-        // The editor header should become sticky
-        setIsEditorSticky(breadcrumbsRect.top <= 56);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navbar - Always sticky at top */}
       <TopNavbar />
 
-      {/* Breadcrumbs Bar - Scrolls away, replaced by editor header */}
-      <div 
-        ref={breadcrumbsRef}
-        className={`sticky top-14 z-40 transition-opacity duration-150 ${isEditorSticky ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-      >
-        <BreadcrumbsBar />
-      </div>
+      {/* Breadcrumbs Bar - NOT sticky, scrolls away naturally */}
+      <BreadcrumbsBar />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div ref={editorContainerRef} className="max-w-6xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6">
           {/* Feature Badges */}
           <div className="flex flex-wrap items-center gap-2 justify-center">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
@@ -62,8 +38,8 @@ const Index = () => {
             </span>
           </div>
 
-          {/* Code Editor */}
-          <CodeEditor stickyHeader={isEditorSticky} />
+          {/* Code Editor - Header will stick when scrolled to top navbar */}
+          <CodeEditor />
 
           {/* Keyboard Shortcuts Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -84,6 +60,9 @@ const Index = () => {
               <span className="ml-2 text-muted-foreground">Redo</span>
             </div>
           </div>
+
+          {/* Extra content to enable scrolling */}
+          <div className="h-[600px]" />
         </div>
       </main>
 
