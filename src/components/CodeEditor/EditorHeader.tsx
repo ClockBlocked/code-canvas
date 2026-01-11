@@ -95,7 +95,7 @@ export const EditorHeader = ({
   fontSize,
 }: EditorHeaderProps) => {
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border rounded-t-lg">
+    <div className="flex items-center justify-between px-4 py-2">
       {/* Left Section - File Info */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
