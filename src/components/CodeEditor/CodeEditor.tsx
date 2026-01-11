@@ -144,12 +144,14 @@ interface CodeEditorProps {
   initialCode?: string;
   fileName?: string;
   initialLanguage?: string;
+  onCodeChange?: (code: string) => void;
 }
 
 export const CodeEditor = ({ 
   initialCode = SAMPLE_CODE, 
   fileName = "useAuth.tsx",
-  initialLanguage = "typescript"
+  initialLanguage = "typescript",
+  onCodeChange
 }: CodeEditorProps) => {
   const [code, setCode] = useState(initialCode);
   const [language, setLanguage] = useState(initialLanguage);
@@ -169,7 +171,8 @@ export const CodeEditor = ({
   const handleCodeChange = useCallback((newCode: string) => {
     setCode(newCode);
     setHasChanges(true);
-  }, []);
+    onCodeChange?.(newCode);
+  }, [onCodeChange]);
 
   const handleCursorChange = useCallback((line: number, column: number) => {
     setCursorLine(line);
