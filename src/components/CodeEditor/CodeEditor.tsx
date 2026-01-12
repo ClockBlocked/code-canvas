@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Card } from "@/components/ui/card";
 import { EditorHeader } from "./EditorHeader";
 import { EditorFooter } from "./EditorFooter";
@@ -140,6 +140,12 @@ const calculateFileSize = (content: string): string => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 
+export interface CodeEditorRef {
+  scrollToLine: (line: number) => void;
+  getContent: () => string;
+  setContent: (content: string) => void;
+}
+
 interface CodeEditorProps {
   initialCode?: string;
   fileName?: string;
@@ -147,12 +153,12 @@ interface CodeEditorProps {
   onCodeChange?: (code: string) => void;
 }
 
-export const CodeEditor = ({ 
+export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(({ 
   initialCode = SAMPLE_CODE, 
   fileName = "useAuth.tsx",
   initialLanguage = "typescript",
   onCodeChange
-}: CodeEditorProps) => {
+}, ref) => {
   const [code, setCode] = useState(initialCode);
   const [language, setLanguage] = useState(initialLanguage);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -186,6 +192,7 @@ export const CodeEditor = ({
     openSearch,
     getContent,
     setContent,
+    scrollToLine,
   } = useCodeMirror({
     initialValue: code,
     language,
@@ -196,6 +203,13 @@ export const CodeEditor = ({
     onChange: handleCodeChange,
     onCursorChange: handleCursorChange,
   });
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    scrollToLine,
+    getContent,
+    setContent,
+  }), [scrollToLine, getContent, setContent]);
 
   const handleCopy = useCallback(() => {
     const content = getContent();
@@ -300,11 +314,11 @@ export const CodeEditor = ({
       )}
     >
       <Card className={cn(
-        "overflow-visible shadow-lg border-border",
+        "overflow-hidden shadow-lg border-border",
         isFullscreen && "h-full flex flex-col"
       )}>
-        {/* Sticky header - sticks to top-14 (navbar height) when scrolling */}
-        <div className="sticky top-14 z-40 bg-muted/50 border-b border-border rounded-t-lg">
+        {/* Sticky header */}
+        <div className="sticky top-14 z-40 bg-muted/80 backdrop-blur-sm border-b border-border">
           <EditorHeader
             fileName={currentFileName}
             language={language}
@@ -326,6 +340,7 @@ export const CodeEditor = ({
             onLanguageChange={setLanguage}
             onFontSizeChange={setFontSize}
             fontSize={fontSize}
+            onSave={handleSave}
           />
         </div>
         
@@ -333,8 +348,7 @@ export const CodeEditor = ({
           ref={editorRef} 
           className={cn(
             "min-h-[400px] overflow-auto",
-            isFullscreen && "flex-1",
-            isDarkTheme ? "bg-[hsl(0,0%,15%)]" : "bg-background"
+            isFullscreen && "flex-1"
           )}
         />
         
@@ -363,6 +377,8 @@ export const CodeEditor = ({
       />
     </div>
   );
-};
+});
+
+CodeEditor.displayName = "CodeEditor";
 
 export default CodeEditor;
