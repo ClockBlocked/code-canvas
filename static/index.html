@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitDev - Code Editor</title>
+  <meta name="description" content="GitHub-style Code Editor built with vanilla HTML, CSS, and JavaScript">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <svg class="loading-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+        <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+      </svg>
+      <p class="loading-text">Loading workspace...</p>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="app hidden">
+    <!-- Top Navbar -->
+    <header class="top-navbar">
+      <div class="navbar-left">
+        <button class="icon-btn" id="toggle-left-sidebar" title="Toggle Left Sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2"/>
+            <path d="M9 3v18"/>
+          </svg>
+        </button>
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" x2="6" y1="3" y2="15"/>
+              <circle cx="18" cy="6" r="3"/>
+              <circle cx="6" cy="18" r="3"/>
+              <path d="M18 9a9 9 0 0 1-9 9"/>
+            </svg>
+          </div>
+          <span class="logo-text">GitDev</span>
+        </div>
+      </div>
+      
+      <div class="navbar-center">
+        <button class="search-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+          <span>Search or jump to...</span>
+          <kbd>/</kbd>
+        </button>
+      </div>
+      
+      <div class="navbar-right">
+        <button class="icon-btn" title="Create New">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/>
+            <path d="M12 5v14"/>
+          </svg>
+        </button>
+        <button class="icon-btn" title="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="toggle-right-sidebar" title="Toggle Right Sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2"/>
+            <path d="M15 3v18"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Breadcrumbs Bar -->
+    <div class="breadcrumbs-bar">
+      <nav class="breadcrumbs">
+        <button class="breadcrumb-btn dropdown-trigger" id="repo-dropdown-trigger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Repositories</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="dropdown-menu" id="repo-dropdown">
+          <button class="dropdown-item">myRepo</button>
+          <button class="dropdown-item">react-components</button>
+          <button class="dropdown-item">api-server</button>
+        </div>
+        <span class="breadcrumb-separator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </span>
+        <span class="breadcrumb-current">myRepo</span>
+      </nav>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <!-- Left Sidebar - File Explorer -->
+      <aside class="left-sidebar" id="left-sidebar">
+        <div class="sidebar-header">
+          <button class="repo-selector" id="sidebar-repo-selector">
+            <div class="repo-selector-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="folder-icon">
+                <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>
+              </svg>
+              <span class="repo-name">myRepo</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" class="lock-icon">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="sidebar-search">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" placeholder="Search files..." id="file-search">
+          </div>
+        </div>
+        
+        <div class="file-tree" id="file-tree">
+          <!-- File tree items will be populated by JS -->
+        </div>
+        
+        <div class="sidebar-footer">
+          <span class="file-count" id="file-count">0 items</span>
+          <button class="icon-btn small">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="19" cy="12" r="1"/>
+              <circle cx="5" cy="12" r="1"/>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="main-content">
+        <!-- Feature Badges -->
+        <div class="feature-badges">
+          <span class="badge primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            </svg>
+            Syntax Highlighting
+          </span>
+          <span class="badge">Multi-Language Support</span>
+          <span class="badge">Line Numbers</span>
+          <span class="badge">Search & Replace</span>
+          <span class="badge">Code Folding</span>
+          <span class="badge">Auto-Complete</span>
+        </div>
+
+        <!-- Code Editor Card -->
+        <div class="editor-card" id="editor-card">
+          <!-- Editor Header -->
+          <div class="editor-header">
+            <div class="editor-header-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="file-icon">
+                <path d="m10 10.5 2 2 4-4"/>
+                <path d="M12 3v3"/>
+                <path d="m18.4 10.4 2.1-2.1"/>
+                <path d="M21 15h-3"/>
+                <path d="m18.4 19.6 2.1 2.1"/>
+                <path d="M12 21v-3"/>
+                <path d="m5.6 19.6-2.1 2.1"/>
+                <path d="M3 15h3"/>
+                <path d="m5.6 10.4-2.1-2.1"/>
+              </svg>
+              <span class="file-name">useAuth.tsx</span>
+              <span class="modified-badge hidden" id="modified-badge">Modified</span>
+              
+              <span class="separator"></span>
+              
+              <button class="dropdown-trigger lang-selector" id="lang-selector">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                <span id="current-lang">TypeScript</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="editor-header-center">
+              <button class="icon-btn small active" id="toggle-edit" title="Toggle Edit Mode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+              </button>
+              
+              <span class="separator"></span>
+              
+              <button class="icon-btn small" id="btn-undo" title="Undo (Ctrl+Z)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 7v6h6"/>
+                  <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+                </svg>
+              </button>
+              <button class="icon-btn small" id="btn-redo" title="Redo (Ctrl+Y)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 7v6h-6"/>
+                  <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/>
+                </svg>
+              </button>
+              
+              <span class="separator"></span>
+              
+              <button class="icon-btn small" id="btn-search" title="Search (Ctrl+F)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.3-4.3"/>
+                </svg>
+              </button>
+              <button class="icon-btn small" id="btn-wrap" title="Toggle Word Wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="3" x2="21" y1="6" y2="6"/>
+                  <path d="M3 12h15a3 3 0 1 1 0 6h-4"/>
+                  <polyline points="16 16 14 18 16 20"/>
+                  <line x1="3" x2="10" y1="18" y2="18"/>
+                </svg>
+              </button>
+              
+              <span class="separator"></span>
+              
+              <button class="icon-btn small" id="btn-copy" title="Copy Code">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                </svg>
+              </button>
+              <button class="icon-btn small" id="btn-download" title="Download File">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" x2="12" y1="15" y2="3"/>
+                </svg>
+              </button>
+              <button class="icon-btn small" id="btn-upload" title="Upload File">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" x2="12" y1="3" y2="15"/>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="editor-header-right">
+              <button class="icon-btn small" id="btn-theme" title="Toggle Theme">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="theme-icon">
+                  <circle cx="12" cy="12" r="4"/>
+                  <path d="M12 2v2"/>
+                  <path d="M12 20v2"/>
+                  <path d="m4.93 4.93 1.41 1.41"/>
+                  <path d="m17.66 17.66 1.41 1.41"/>
+                  <path d="M2 12h2"/>
+                  <path d="M20 12h2"/>
+                  <path d="m6.34 17.66-1.41 1.41"/>
+                  <path d="m19.07 4.93-1.41 1.41"/>
+                </svg>
+              </button>
+              <button class="icon-btn small" id="btn-font-size" title="Font Size">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="4 7 4 4 20 4 20 7"/>
+                  <line x1="9" x2="15" y1="20" y2="20"/>
+                  <line x1="12" x2="12" y1="4" y2="20"/>
+                </svg>
+              </button>
+              <button class="icon-btn small" id="btn-fullscreen" title="Fullscreen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 3 21 3 21 9"/>
+                  <polyline points="9 21 3 21 3 15"/>
+                  <line x1="21" x2="14" y1="3" y2="10"/>
+                  <line x1="3" x2="10" y1="21" y2="14"/>
+                </svg>
+              </button>
+              <button class="icon-btn small" id="btn-more" title="More Options">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="1"/>
+                  <circle cx="19" cy="12" r="1"/>
+                  <circle cx="5" cy="12" r="1"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Editor Content -->
+          <div class="editor-content" id="editor-content">
+            <div class="line-numbers" id="line-numbers"></div>
+            <pre class="code-area" id="code-area"><code id="code-display"></code></pre>
+          </div>
+          
+          <!-- Editor Footer -->
+          <div class="editor-footer">
+            <div class="footer-left">
+              <span class="cursor-pos">Ln <span id="cursor-line">1</span>, Col <span id="cursor-col">1</span></span>
+              <span class="separator-dot">|</span>
+              <span><span id="line-count">0</span> lines</span>
+              <span class="separator-dot">•</span>
+              <span><span id="char-count">0</span> chars</span>
+              <span class="separator-dot">|</span>
+              <span class="file-size">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                </svg>
+                <span id="file-size">0 B</span>
+              </span>
+            </div>
+            
+            <div class="footer-center">
+              <span class="status-ok">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                No Issues
+              </span>
+            </div>
+            
+            <div class="footer-right">
+              <span class="saved-time">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                Saved <span id="last-saved">Never</span>
+              </span>
+              <span class="separator-dot">|</span>
+              <span class="encoding-badge">UTF-8</span>
+              <span class="encoding-badge">LF</span>
+              <span class="encoding-badge">Spaces: 2</span>
+              <span class="lang-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                <span id="footer-lang">typescript</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keyboard Shortcuts -->
+        <div class="keyboard-shortcuts">
+          <div class="shortcut-card">
+            <kbd>Ctrl+S</kbd>
+            <span>Save</span>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Ctrl+F</kbd>
+            <span>Search</span>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Ctrl+Z</kbd>
+            <span>Undo</span>
+          </div>
+          <div class="shortcut-card">
+            <kbd>Ctrl+Y</kbd>
+            <span>Redo</span>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Sidebar - Code Outline -->
+      <aside class="right-sidebar" id="right-sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="title-icon">
+              <path d="M10 10.5 2 2"/>
+              <path d="m2 2 8.5 8.5"/>
+              <path d="m6 14 8 8"/>
+              <path d="M14 6l8 8"/>
+            </svg>
+            <span>Outline</span>
+          </div>
+          <button class="icon-btn small" id="close-right-sidebar" title="Close panel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"/>
+              <path d="m6 6 12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="outline-content" id="outline-content">
+          <!-- Outline items will be populated by JS -->
+        </div>
+        
+        <div class="sidebar-footer">
+          <span id="symbol-count">0 symbols found</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span id="toast-message"></span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
