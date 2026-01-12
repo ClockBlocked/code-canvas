@@ -1,11 +1,12 @@
-import { useState, useCallback, useEffect } from "react";
-import { CodeEditor } from "@/components/CodeEditor";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { CodeEditor, CodeEditorRef } from "@/components/CodeEditor";
 import { TopNavbar } from "@/components/TopNavbar";
 import { BreadcrumbsBar } from "@/components/BreadcrumbsBar";
 import { FileExplorerSidebar } from "@/components/FileExplorerSidebar";
 import { CodeOutlinePanel } from "@/components/CodeOutlinePanel";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FileItem } from "@/lib/db";
 
 const SAMPLE_CODE = `// Welcome to the GitHub-style Code Editor
 // Built with CodeMirror 6 and React
@@ -139,10 +140,12 @@ const Index = () => {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
   const [code, setCode] = useState(SAMPLE_CODE);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
+  const editorRef = useRef<CodeEditorRef>(null);
 
   // Simulate initial loading
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
+    const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
@@ -150,12 +153,26 @@ const Index = () => {
     setCode(newCode);
   }, []);
 
+  const handleSymbolClick = useCallback((line: number) => {
+    if (editorRef.current) {
+      editorRef.current.scrollToLine(line);
+    }
+  }, []);
+
+  const handleFileSelect = useCallback((file: FileItem) => {
+    setCurrentFile(file);
+    // In a real app, you would load the file content here
+  }, []);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading workspace...</p>
+          <div className="relative">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <div className="absolute inset-0 h-10 w-10 animate-ping rounded-full bg-primary/20" />
+          </div>
+          <p className="text-muted-foreground font-medium">Loading workspace...</p>
         </div>
       </div>
     );
@@ -176,63 +193,45 @@ const Index = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar - File Explorer */}
         <div className={cn(
-          "transition-all duration-300 ease-in-out",
+          "transition-all duration-300 ease-in-out overflow-hidden",
           leftSidebarOpen ? "w-64" : "w-0"
         )}>
           <FileExplorerSidebar 
             isOpen={leftSidebarOpen} 
-            onClose={() => setLeftSidebarOpen(false)} 
+            onClose={() => setLeftSidebarOpen(false)}
+            onFileSelect={handleFileSelect}
           />
         </div>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-auto">
-          <div className="p-4 space-y-4">
-            {/* Feature Badges */}
-            <div className="flex flex-wrap items-center gap-2 justify-center animate-fade-in">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                <Sparkles className="h-3 w-3" />
-                Syntax Highlighting
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                Multi-Language Support
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                Line Numbers
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                Search & Replace
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                Code Folding
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-                Auto-Complete
-              </span>
-            </div>
-
+        <main className="flex-1 overflow-auto min-w-0">
+          <div className="p-4">
             {/* Code Editor */}
-            <div className="animate-scale-in">
-              <CodeEditor onCodeChange={handleCodeChange} />
+            <div className="animate-fade-in">
+              <CodeEditor 
+                ref={editorRef}
+                onCodeChange={handleCodeChange} 
+                fileName={currentFile?.name || "useAuth.tsx"}
+              />
             </div>
 
-            {/* Keyboard Shortcuts Info */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm animate-fade-in">
+            {/* Keyboard Shortcuts Info - Mobile Hidden */}
+            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4 animate-fade-in">
               <div className="p-3 rounded-lg bg-card border border-border">
                 <kbd className="px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono text-xs">Ctrl+S</kbd>
-                <span className="ml-2 text-muted-foreground">Save</span>
+                <span className="ml-2 text-muted-foreground text-sm">Save</span>
               </div>
               <div className="p-3 rounded-lg bg-card border border-border">
                 <kbd className="px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono text-xs">Ctrl+F</kbd>
-                <span className="ml-2 text-muted-foreground">Search</span>
+                <span className="ml-2 text-muted-foreground text-sm">Search</span>
               </div>
               <div className="p-3 rounded-lg bg-card border border-border">
                 <kbd className="px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono text-xs">Ctrl+Z</kbd>
-                <span className="ml-2 text-muted-foreground">Undo</span>
+                <span className="ml-2 text-muted-foreground text-sm">Undo</span>
               </div>
               <div className="p-3 rounded-lg bg-card border border-border">
                 <kbd className="px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono text-xs">Ctrl+Y</kbd>
-                <span className="ml-2 text-muted-foreground">Redo</span>
+                <span className="ml-2 text-muted-foreground text-sm">Redo</span>
               </div>
             </div>
           </div>
@@ -240,7 +239,7 @@ const Index = () => {
 
         {/* Right Sidebar - Code Outline */}
         <div className={cn(
-          "transition-all duration-300 ease-in-out",
+          "transition-all duration-300 ease-in-out overflow-hidden",
           rightSidebarOpen ? "w-64" : "w-0"
         )}>
           <CodeOutlinePanel
@@ -248,6 +247,7 @@ const Index = () => {
             onClose={() => setRightSidebarOpen(false)}
             code={code}
             language="typescript"
+            onSymbolClick={handleSymbolClick}
           />
         </div>
       </div>
