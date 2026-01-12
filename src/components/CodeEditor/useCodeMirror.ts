@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { EditorState, Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLine } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap, indentWithTab, undo, redo } from "@codemirror/commands";
-import { syntaxHighlighting, indentOnInput, bracketMatching, foldGutter, foldKeymap, HighlightStyle } from "@codemirror/language";
+import { syntaxHighlighting, indentOnInput, bracketMatching, foldGutter, foldKeymap, defaultHighlightStyle, HighlightStyle } from "@codemirror/language";
 import { searchKeymap, highlightSelectionMatches, openSearchPanel } from "@codemirror/search";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
@@ -82,29 +82,29 @@ const createLightTheme = () => EditorView.theme({
 
 const createDarkTheme = () => EditorView.theme({
   "&": {
-    backgroundColor: "hsl(216 18% 13%)",
-    color: "hsl(210 14% 83%)",
+    backgroundColor: "hsl(0 0% 15%)",
+    color: "hsl(248 0.3% 98.4%)",
   },
   ".cm-content": {
-    caretColor: "hsl(212 92% 45%)",
+    caretColor: "hsl(212 79% 56%)",
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   },
   ".cm-cursor, .cm-dropCursor": {
-    borderLeftColor: "hsl(212 92% 45%)",
+    borderLeftColor: "hsl(212 79% 56%)",
   },
   ".cm-selectionBackground, ::selection": {
-    backgroundColor: "hsl(212 92% 45% / 0.3)",
+    backgroundColor: "hsl(212 79% 56% / 0.3)",
   },
   ".cm-activeLine": {
-    backgroundColor: "hsl(215 14% 22% / 0.5)",
+    backgroundColor: "hsl(260 4.1% 27.9% / 0.3)",
   },
   ".cm-activeLineGutter": {
-    backgroundColor: "hsl(215 14% 22% / 0.5)",
+    backgroundColor: "hsl(260 4.1% 27.9% / 0.3)",
   },
   ".cm-gutters": {
-    backgroundColor: "hsl(216 18% 11%)",
-    color: "hsl(215 13% 55%)",
-    borderRight: "1px solid hsl(215 14% 25%)",
+    backgroundColor: "hsl(266 4% 18%)",
+    color: "hsl(257 4% 70.4%)",
+    borderRight: "1px solid hsl(0 0% 100% / 10%)",
   },
   ".cm-lineNumbers .cm-gutterElement": {
     padding: "0 12px 0 8px",
@@ -121,7 +121,7 @@ const createDarkTheme = () => EditorView.theme({
     backgroundColor: "hsl(45 100% 40%)",
   },
   ".cm-selectionMatch": {
-    backgroundColor: "hsl(212 92% 45% / 0.2)",
+    backgroundColor: "hsl(212 79% 56% / 0.2)",
   },
 }, { dark: true });
 
@@ -211,27 +211,6 @@ export const useCodeMirror = ({
       viewRef.current.dispatch({
         changes: { from: 0, to: viewRef.current.state.doc.length, insert: content }
       });
-    }
-  }, []);
-
-  // Scroll to a specific line in the editor
-  const scrollToLine = useCallback((lineNumber: number) => {
-    if (viewRef.current) {
-      const doc = viewRef.current.state.doc;
-      const maxLines = doc.lines;
-      
-      // Ensure line number is within valid range
-      const targetLine = Math.min(Math.max(1, lineNumber), maxLines);
-      const line = doc.line(targetLine);
-      
-      // Scroll the line into view and move cursor to beginning of line
-      viewRef.current.dispatch({
-        selection: { anchor: line.from },
-        effects: EditorView.scrollIntoView(line.from, { y: "center" }),
-      });
-      
-      // Focus the editor
-      viewRef.current.focus();
     }
   }, []);
 
@@ -325,6 +304,5 @@ export const useCodeMirror = ({
     openSearch,
     getContent,
     setContent,
-    scrollToLine,
   };
 };

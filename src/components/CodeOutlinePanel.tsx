@@ -9,6 +9,7 @@ import {
   ChevronRight,
   ChevronDown,
   FileCode,
+  Loader2,
   X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,6 @@ interface CodeOutlinePanelProps {
   onClose: () => void;
   code: string;
   language: string;
-  onSymbolClick?: (line: number) => void;
 }
 
 interface Symbol {
@@ -40,7 +40,7 @@ interface Symbol {
 const getSymbolIcon = (type: Symbol["type"]) => {
   switch (type) {
     case "function":
-      return <FunctionSquare className="h-4 w-4 text-amber-400" />;
+      return <FunctionSquare className="h-4 w-4 text-yellow-400" />;
     case "class":
       return <Braces className="h-4 w-4 text-orange-400" />;
     case "interface":
@@ -165,10 +165,9 @@ interface SymbolItemProps {
   symbol: Symbol;
   level: number;
   onClick: (line: number) => void;
-  isActive?: boolean;
 }
 
-const SymbolItem = ({ symbol, level, onClick, isActive }: SymbolItemProps) => {
+const SymbolItem = ({ symbol, level, onClick }: SymbolItemProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const hasChildren = symbol.children && symbol.children.length > 0;
 
@@ -182,23 +181,22 @@ const SymbolItem = ({ symbol, level, onClick, isActive }: SymbolItemProps) => {
           onClick(symbol.line);
         }}
         className={cn(
-          "flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-md transition-all duration-150",
-          "hover:bg-accent active:scale-[0.98]",
-          isActive && "bg-accent ring-1 ring-primary/20"
+          "flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+          "hover:bg-accent group"
         )}
         style={{ paddingLeft: `${level * 12 + 8}px` }}
       >
         {hasChildren ? (
           isExpanded ? 
-            <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" /> : 
-            <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+            <ChevronDown className="h-3 w-3 shrink-0" /> : 
+            <ChevronRight className="h-3 w-3 shrink-0" />
         ) : (
           <span className="w-3" />
         )}
         {getSymbolIcon(symbol.type)}
-        <span className="truncate flex-1 text-left font-medium">{symbol.name}</span>
-        <span className="text-xs text-muted-foreground font-mono">
-          :{symbol.line}
+        <span className="truncate flex-1 text-left">{symbol.name}</span>
+        <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+          L{symbol.line}
         </span>
       </button>
       
@@ -218,15 +216,8 @@ const SymbolItem = ({ symbol, level, onClick, isActive }: SymbolItemProps) => {
   );
 };
 
-export const CodeOutlinePanel = ({ 
-  isOpen, 
-  onClose, 
-  code, 
-  language,
-  onSymbolClick 
-}: CodeOutlinePanelProps) => {
+export const CodeOutlinePanel = ({ isOpen, onClose, code, language }: CodeOutlinePanelProps) => {
   const [loading, setLoading] = useState(true);
-  const [activeSymbolId, setActiveSymbolId] = useState<string | null>(null);
 
   const symbols = useMemo(() => {
     return parseSymbols(code, language);
@@ -239,11 +230,9 @@ export const CodeOutlinePanel = ({
     return () => clearTimeout(timer);
   }, [code]);
 
-  const handleSymbolClick = (line: number, symbolId: string) => {
-    setActiveSymbolId(symbolId);
-    if (onSymbolClick) {
-      onSymbolClick(line);
-    }
+  const handleSymbolClick = (line: number) => {
+    // Could scroll to line in editor here
+    console.log("Navigate to line:", line);
   };
 
   // Group symbols by type
@@ -275,7 +264,7 @@ export const CodeOutlinePanel = ({
       <div className="flex items-center justify-between p-3 border-b border-border">
         <div className="flex items-center gap-2">
           <FileCode className="h-4 w-4 text-primary" />
-          <span className="font-semibold text-sm">Outline</span>
+          <span className="font-medium text-sm">Outline</span>
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -303,11 +292,10 @@ export const CodeOutlinePanel = ({
               <p className="text-xs mt-1">Try a different file</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {groupedSymbols.functions.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
-                    <FunctionSquare className="h-3 w-3" />
+                  <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 uppercase tracking-wider">
                     Functions ({groupedSymbols.functions.length})
                   </h3>
                   <div className="space-y-0.5">
@@ -316,8 +304,7 @@ export const CodeOutlinePanel = ({
                         key={symbol.id}
                         symbol={symbol}
                         level={0}
-                        onClick={(line) => handleSymbolClick(line, symbol.id)}
-                        isActive={activeSymbolId === symbol.id}
+                        onClick={handleSymbolClick}
                       />
                     ))}
                   </div>
@@ -326,8 +313,7 @@ export const CodeOutlinePanel = ({
 
               {groupedSymbols.interfaces.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
-                    <Type className="h-3 w-3" />
+                  <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 uppercase tracking-wider">
                     Interfaces ({groupedSymbols.interfaces.length})
                   </h3>
                   <div className="space-y-0.5">
@@ -336,8 +322,7 @@ export const CodeOutlinePanel = ({
                         key={symbol.id}
                         symbol={symbol}
                         level={0}
-                        onClick={(line) => handleSymbolClick(line, symbol.id)}
-                        isActive={activeSymbolId === symbol.id}
+                        onClick={handleSymbolClick}
                       />
                     ))}
                   </div>
@@ -346,8 +331,7 @@ export const CodeOutlinePanel = ({
 
               {groupedSymbols.types.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
-                    <Type className="h-3 w-3" />
+                  <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 uppercase tracking-wider">
                     Types ({groupedSymbols.types.length})
                   </h3>
                   <div className="space-y-0.5">
@@ -356,8 +340,7 @@ export const CodeOutlinePanel = ({
                         key={symbol.id}
                         symbol={symbol}
                         level={0}
-                        onClick={(line) => handleSymbolClick(line, symbol.id)}
-                        isActive={activeSymbolId === symbol.id}
+                        onClick={handleSymbolClick}
                       />
                     ))}
                   </div>
@@ -366,8 +349,7 @@ export const CodeOutlinePanel = ({
 
               {groupedSymbols.classes.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
-                    <Braces className="h-3 w-3" />
+                  <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 uppercase tracking-wider">
                     Classes ({groupedSymbols.classes.length})
                   </h3>
                   <div className="space-y-0.5">
@@ -376,8 +358,7 @@ export const CodeOutlinePanel = ({
                         key={symbol.id}
                         symbol={symbol}
                         level={0}
-                        onClick={(line) => handleSymbolClick(line, symbol.id)}
-                        isActive={activeSymbolId === symbol.id}
+                        onClick={handleSymbolClick}
                       />
                     ))}
                   </div>
@@ -386,8 +367,7 @@ export const CodeOutlinePanel = ({
 
               {groupedSymbols.variables.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">
-                    <Variable className="h-3 w-3" />
+                  <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 uppercase tracking-wider">
                     Variables ({groupedSymbols.variables.length})
                   </h3>
                   <div className="space-y-0.5">
@@ -396,8 +376,7 @@ export const CodeOutlinePanel = ({
                         key={symbol.id}
                         symbol={symbol}
                         level={0}
-                        onClick={(line) => handleSymbolClick(line, symbol.id)}
-                        isActive={activeSymbolId === symbol.id}
+                        onClick={handleSymbolClick}
                       />
                     ))}
                   </div>
@@ -411,7 +390,7 @@ export const CodeOutlinePanel = ({
       {/* Footer */}
       <div className="p-2 border-t border-border">
         <div className="text-xs text-muted-foreground text-center">
-          {symbols.length} symbol{symbols.length !== 1 ? 's' : ''} • Click to jump
+          {symbols.length} symbol{symbols.length !== 1 ? 's' : ''} found
         </div>
       </div>
     </aside>
