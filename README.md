@@ -1,73 +1,106 @@
-# Welcome to your Lovable project
+# Code Canvas
 
-## Project info
+A GitHub-style code editor built with vanilla JavaScript and CodeMirror 6.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- 🎨 **GitHub Dark Dimmed Theme** - Beautiful dark theme matching GitHub's design
+- 📝 **Syntax Highlighting** - Support for JavaScript, TypeScript, Python, HTML, CSS, JSON, and Markdown
+- 🔍 **Code Outline** - Functional right sidebar showing functions, classes, and variables
+- 📁 **File Explorer** - Left sidebar with file tree navigation
+- 🔎 **Search & Replace** - Built-in search functionality
+- 📊 **Line Numbers** - Clear line numbering and code folding
+- ⌨️ **Keyboard Shortcuts** - Full keyboard support (Ctrl+S, Ctrl+F, Ctrl+Z, etc.)
+- 📤 **Import/Export** - Upload and download files
+- 🖥️ **Fullscreen Mode** - Focus on your code
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Technologies
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **HTML5** - Semantic markup
+- **CSS3** - Custom styling with GitHub Dark Dimmed theme
+- **Vanilla JavaScript (ES6+)** - No frameworks, just pure JavaScript
+- **CodeMirror 6** - Powerful code editor component
+- **Vite** - Fast build tool and dev server
 
-## How can I deploy this project?
+## Getting Started
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Prerequisites
 
-## Can I connect a custom domain to my Lovable project?
+- Node.js 16+ and npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Yes, you can!
+### Installation
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```sh
+# Clone the repository
+git clone https://github.com/ClockBlocked/code-canvas.git
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# Navigate to the project directory
+cd code-canvas
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+The application will open at http://localhost:5173
+
+### Build for Production
+
+```sh
+# Build the project
+npm run build
+
+# Preview the production build
+npm run preview
+```
+
+## Usage
+
+### Editor Controls
+
+- **Toggle Left Sidebar** - Show/hide file explorer
+- **Toggle Right Sidebar** - Show/hide code outline
+- **Undo/Redo** - Standard undo/redo operations
+- **Search** - Find and replace in code
+- **Line Wrap** - Toggle line wrapping
+- **Copy** - Copy code to clipboard
+- **Download** - Save file to disk
+- **Upload** - Load file from disk
+- **Fullscreen** - Toggle fullscreen mode
+
+### Keyboard Shortcuts
+
+- `Ctrl+S` - Save (shows notification)
+- `Ctrl+F` - Open search panel
+- `Ctrl+Z` - Undo
+- `Ctrl+Y` - Redo
+- `Tab` - Indent
+
+### Code Outline
+
+The right sidebar displays a structured outline of your code:
+- Functions with line numbers
+- Classes with line numbers
+- Variables with line numbers
+
+Click any symbol to jump to its location in the editor.
+
+## Project Structure
+
+```
+code-canvas/
+├── index.html      # Main HTML file
+├── styles.css      # GitHub Dark Dimmed theme and styling
+├── app.js          # Main application logic and CodeMirror setup
+├── icons.js        # SVG icon definitions
+├── vite.config.js  # Vite configuration
+└── package.json    # Dependencies (CodeMirror only)
+```
+
+## License
+
+MIT

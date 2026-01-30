@@ -1,28 +1,240 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Canvas - GitHub Style Code Editor</title>
+    <meta name="description" content="GitHub-style Code Editor with CodeMirror">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark">
+    <!-- Top Navbar -->
+    <header id="top-navbar">
+        <div class="navbar-content">
+            <!-- Left Section -->
+            <div class="navbar-left">
+                <button id="toggle-left-sidebar" class="icon-button" title="Toggle Left Sidebar">
+                    <i data-icon="panel-left"></i>
+                </button>
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <i data-icon="git-branch"></i>
+                    </div>
+                    <span class="logo-text">GitDev</span>
+                </div>
+            </div>
 
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+            <!-- Center Section -->
+            <div class="navbar-center">
+                <button class="search-button">
+                    <i data-icon="search"></i>
+                    <span>Search or jump to...</span>
+                    <kbd>/</kbd>
+                </button>
+            </div>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+            <!-- Right Section -->
+            <div class="navbar-right">
+                <button class="icon-button" title="Create New">
+                    <i data-icon="plus"></i>
+                </button>
+                <button class="icon-button" title="Notifications">
+                    <i data-icon="bell"></i>
+                </button>
+                <button id="toggle-right-sidebar" class="icon-button" title="Toggle Right Sidebar">
+                    <i data-icon="panel-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
 
-  <body>
-    <div id="root"></div>
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <!-- Breadcrumbs Bar -->
+    <div id="breadcrumbs-bar">
+        <div class="breadcrumbs-content">
+            <i data-icon="folder" class="breadcrumb-icon"></i>
+            <span>code-canvas</span>
+            <i data-icon="chevron-right" class="breadcrumb-separator"></i>
+            <span>src</span>
+            <i data-icon="chevron-right" class="breadcrumb-separator"></i>
+            <span class="breadcrumb-current">useAuth.tsx</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div id="main-layout">
+        <!-- Left Sidebar - File Explorer -->
+        <aside id="left-sidebar" class="sidebar-open">
+            <div class="sidebar-header">
+                <button id="repo-selector" class="repo-selector">
+                    <div class="repo-selector-content">
+                        <i data-icon="folder"></i>
+                        <span id="selected-repo-name">code-canvas</span>
+                    </div>
+                    <i data-icon="chevron-down"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-search">
+                <div class="search-input-wrapper">
+                    <i data-icon="search"></i>
+                    <input type="text" id="file-search" placeholder="Search files..." />
+                </div>
+            </div>
+
+            <div class="sidebar-content" id="file-tree">
+                <!-- File tree will be populated by JavaScript -->
+            </div>
+
+            <div class="sidebar-footer">
+                <span id="file-count">0 items</span>
+                <button class="icon-button-small" title="More options">
+                    <i data-icon="more-horizontal"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <div class="content-wrapper">
+                <!-- Feature Badges -->
+                <div class="feature-badges">
+                    <span class="badge badge-primary">
+                        <i data-icon="sparkles"></i>
+                        Syntax Highlighting
+                    </span>
+                    <span class="badge">Multi-Language Support</span>
+                    <span class="badge">Line Numbers</span>
+                    <span class="badge">Search & Replace</span>
+                    <span class="badge">Code Folding</span>
+                    <span class="badge">Auto-Complete</span>
+                </div>
+
+                <!-- Code Editor -->
+                <div id="editor-container" class="editor-container">
+                    <!-- Editor Header -->
+                    <div class="editor-header">
+                        <div class="editor-header-left">
+                            <i data-icon="file-code"></i>
+                            <span id="editor-filename">useAuth.tsx</span>
+                            <span class="editor-language">TypeScript</span>
+                        </div>
+                        <div class="editor-header-right">
+                            <button class="icon-button-small" id="editor-undo" title="Undo (Ctrl+Z)">
+                                <i data-icon="undo"></i>
+                            </button>
+                            <button class="icon-button-small" id="editor-redo" title="Redo (Ctrl+Y)">
+                                <i data-icon="redo"></i>
+                            </button>
+                            <button class="icon-button-small" id="editor-search" title="Search (Ctrl+F)">
+                                <i data-icon="search"></i>
+                            </button>
+                            <button class="icon-button-small" id="editor-wrap" title="Toggle Line Wrap">
+                                <i data-icon="wrap-text"></i>
+                            </button>
+                            <button class="icon-button-small" id="editor-copy" title="Copy to Clipboard">
+                                <i data-icon="copy"></i>
+                            </button>
+                            <button class="icon-button-small" id="editor-download" title="Download File">
+                                <i data-icon="download"></i>
+                            </button>
+                            <button class="icon-button-small" id="editor-upload" title="Upload File">
+                                <i data-icon="upload"></i>
+                            </button>
+                            <button class="icon-button-small" id="editor-fullscreen" title="Toggle Fullscreen">
+                                <i data-icon="maximize"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Editor Content -->
+                    <div id="editor" class="editor-content"></div>
+
+                    <!-- Editor Footer -->
+                    <div class="editor-footer">
+                        <div class="editor-footer-left">
+                            <span id="editor-cursor">Ln 1, Col 1</span>
+                            <span class="footer-separator">|</span>
+                            <span id="editor-lines">0 lines</span>
+                            <span class="footer-separator">|</span>
+                            <span id="editor-chars">0 chars</span>
+                            <span class="footer-separator">|</span>
+                            <span id="editor-size">0 B</span>
+                        </div>
+                        <div class="editor-footer-right">
+                            <span>UTF-8</span>
+                            <span class="footer-separator">|</span>
+                            <span>LF</span>
+                            <span class="footer-separator">|</span>
+                            <span>Spaces: 2</span>
+                            <span class="footer-separator">|</span>
+                            <span id="editor-language-footer">TypeScript</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keyboard Shortcuts Info -->
+                <div class="shortcuts-grid">
+                    <div class="shortcut-card">
+                        <kbd>Ctrl+S</kbd>
+                        <span>Save</span>
+                    </div>
+                    <div class="shortcut-card">
+                        <kbd>Ctrl+F</kbd>
+                        <span>Search</span>
+                    </div>
+                    <div class="shortcut-card">
+                        <kbd>Ctrl+Z</kbd>
+                        <span>Undo</span>
+                    </div>
+                    <div class="shortcut-card">
+                        <kbd>Ctrl+Y</kbd>
+                        <span>Redo</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Code Outline -->
+        <aside id="right-sidebar" class="sidebar-open">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i data-icon="file-code"></i>
+                    <span>Outline</span>
+                </div>
+                <button id="close-right-sidebar" class="icon-button-small" title="Close panel">
+                    <i data-icon="x"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-content" id="outline-content">
+                <div id="outline-loading" class="outline-loading">
+                    <i data-icon="loader-2" class="spinner"></i>
+                    <p>Analyzing code...</p>
+                </div>
+                <div id="outline-tree" style="display: none;">
+                    <!-- Code outline will be populated by JavaScript -->
+                </div>
+                <div id="outline-empty" style="display: none;" class="outline-empty">
+                    <i data-icon="code-2"></i>
+                    <p>No symbols found</p>
+                    <p class="text-small">Try a different file</p>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <span id="symbol-count">0 symbols found</span>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Hidden file input for upload -->
+    <input type="file" id="file-input" style="display: none;" accept=".js,.jsx,.ts,.tsx,.py,.html,.css,.json,.md,.txt">
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- CodeMirror Dependencies -->
+    <script type="module" src="app.js"></script>
+</body>
 </html>
