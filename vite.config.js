@@ -5,12 +5,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
-      input: {
-        main: '/app.html'
-      }
+      input: './index.html'
     }
-  },
-  server: {
-    open: '/app.html'
   }
 })
