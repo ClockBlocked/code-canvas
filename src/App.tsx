@@ -25,7 +25,7 @@ const App = () => (
       <ThemeInitializer />
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/code-canvas">
         <NavigationProgress />
         <Routes>
           <Route path="/" element={<Index />} />
